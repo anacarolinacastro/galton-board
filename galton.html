@@ -9,8 +9,8 @@
 <script type="application/processing" data-processing-target="pjs">
 
 var width = 500, height = 600;
-var n = 500, levels = 9, raioPrego = 2, raioBola = 7;
 var h = 100, d = 50; // h = y do primeiro prego e d = distancia entre eles
+var n = 500, levels = 9, raioPrego = 2, raioBola = d/4;
 var pregos = [], bolas = [];
 var bola = new Bola(rand(d/2,d/2),raioBola);
 
@@ -88,14 +88,10 @@ function distancia(bola,prego){
 }
 
 function colisao(bola,i){
-	// println("checando colisao");
 	for (p in pregos){
 		if (pregos[p].nivel == i){
 			var d = distancia(bola,pregos[p]);
-			println(d+" <= "+(raioPrego+raioBola));
 			if (d<(raioBola+raioPrego)){
-				println("colidiu!");
-				// println(d+" <= "+(raioPrego+raioBola));
 				return true;
 			}
 		}
@@ -116,7 +112,7 @@ void draw() {
 
     v = 0.5 * frameCount;
     // if (v > height -raioBola/2){
-    if (bola.y > height -raioBola/2){
+    if (bola.y > height -raioBola){
     	frameCount = 0;
     	desvio = 0;
     	// salva a bola num vetor de bolas que cairam
@@ -125,14 +121,13 @@ void draw() {
     	bola = new Bola(rand(d/2,d/2),raioBola);
     }
     else{
-    	bola.y = bola.y + 0.1 * frameCount;
+    	bola.y += 0.01*frameCount;
 	    fill(255,0,0);
 	    ellipse(bola.x,bola.y,bola.raio*2, bola.raio*2);
 	    i = Math.floor(Math.abs(((bola.y+raioBola/2)-h)/(d/2*Math.sqrt(3)))); // pega a linha de pregos que a bola ira passar/colidir
-	    // i = Math.floor(Math.abs(((bola.y+raioBola/2)-h)/(d/2*Math.sqrt(3)))); // pega a linha de pregos que a bola ira passar/colidir
+
 	    if(colisao(bola,i)){
-	    	// desvio += 20;
-	    	println("colidiu");
+	    	bola.x += Math.pow((-1),Math.floor(Math.random() * 2))*10;
 	    }   
     }
 
