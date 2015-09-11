@@ -1,0 +1,148 @@
+<!--    Author: Ana Carolina Castro   -->
+<!-- Email: anacarolinacastro@aol.com -->
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<script src="processing.js"></script>
+<script type="application/processing" data-processing-target="pjs">
+
+var width = 500, height = 600;
+var n = 500, levels = 9, raioPrego = 2, raioBola = 7;
+var h = 100, d = 50; // h = y do primeiro prego e d = distancia entre eles
+var pregos = [], bolas = [];
+var bola = new Bola(rand(d/2,d/2),raioBola);
+
+function Prego(_x, _y, _nivel){
+	this.x = _x;
+	this.y = _y;
+	this.raio = raioPrego;
+	this.nivel = _nivel;
+}
+
+function Bola(_x, _y){
+	this.x = _x;
+	this.y = _y;
+	this.raio = raioBola;
+
+	function setY(value){
+		this.y = value;
+	}
+}
+
+function gerarPregos(){
+	pregos = [];
+	for (var i = 0; i<levels; i++){
+		if (i%2 == 0){
+			for (var k = Math.ceil(-levels/2); k<Math.ceil(levels/2); k++){
+				prego = new Prego(width/2 + k*d,i*(d/2)*Math.sqrt(3) + h,i);
+				pregos.push(prego);
+			}
+		}
+		else{
+			for (var k = -levels; k<=levels; k = k+2){
+				prego = new Prego(width/2 + k*d/2,i*(d/2)*Math.sqrt(3) + h,i);
+				pregos.push(prego);
+			}
+		}
+	}
+}
+
+function desenharPregos(){
+	noStroke();
+	for (i in pregos){
+		fill(0,0,0);
+		ellipse(pregos[i].x,pregos[i].y,pregos[i].raio*2,pregos[i].raio*2);
+	}
+}
+
+function desenharDivisorias(){
+	for (var i = 0; i<width; i = i+d){
+		noFill();
+		stroke(0,0,0);
+		rect(i,445,d-1,195-41);
+	}
+}
+
+function desenharParedes(){
+	noFill();
+	stroke(0,0,0);
+	rect(0,40, width-1,height-1);
+} 
+
+
+function rand(a,b){
+	var min = width/2 - a + raioBola;
+	var max = width/2 + b - raioBola;
+
+	return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function distancia(bola,prego){
+	var a = Math.pow(bola.x-prego.x,2);
+	var b = Math.pow(bola.y-prego.y,2);
+
+	return Math.sqrt(a+b);
+	// return 0;
+}
+
+function colisao(bola,i){
+	// println("checando colisao");
+	for (p in pregos){
+		if (pregos[p].nivel == i){
+			var d = distancia(bola,pregos[p]);
+			println(d+" <= "+(raioPrego+raioBola));
+			if (d<(raioBola+raioPrego)){
+				println("colidiu!");
+				// println(d+" <= "+(raioPrego+raioBola));
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+void setup() {
+  size(width, height);
+  noStroke();
+  gerarPregos();
+}
+var desvio = 0;
+void draw() {
+	background(255,255,255); // clear the frame
+    desenharPregos();
+
+    v = 0.5 * frameCount;
+    // if (v > height -raioBola/2){
+    if (bola.y > height -raioBola/2){
+    	frameCount = 0;
+    	desvio = 0;
+    	// salva a bola num vetor de bolas que cairam
+    	// a bola para quando encontra uma outra bola na divisoria
+    	bolas.push(Bola(bola.x,bola.y));
+    	bola = new Bola(rand(d/2,d/2),raioBola);
+    }
+    else{
+    	bola.y = bola.y + 0.1 * frameCount;
+	    fill(255,0,0);
+	    ellipse(bola.x,bola.y,bola.raio*2, bola.raio*2);
+	    i = Math.floor(Math.abs(((bola.y+raioBola/2)-h)/(d/2*Math.sqrt(3)))); // pega a linha de pregos que a bola ira passar/colidir
+	    // i = Math.floor(Math.abs(((bola.y+raioBola/2)-h)/(d/2*Math.sqrt(3)))); // pega a linha de pregos que a bola ira passar/colidir
+	    if(colisao(bola,i)){
+	    	// desvio += 20;
+	    	println("colidiu");
+	    }   
+    }
+
+    desenharDivisorias();
+    desenharParedes();
+  	// enquanto a bola nao cair em uma divisoria ela continua caindo
+  	// desenhar cada bola no vetor bola (estarao nas divisorias em repouso)
+}
+</script>
+<canvas id="pjs"> </canvas>
+
+</body>
+</html>
